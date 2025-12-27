@@ -7,11 +7,10 @@
 using namespace std;
 using namespace std::chrono;
 
-// Iteratif 
+// Iteratif
 int binarySearchIterative(const vector<long long>& arr,long long target) {
     int left=0;
-    int right=arr.size() - 1;
-
+    int right=arr.size()-1;
     while (left<=right) {
         int mid=left+(right-left)/2;
         if (arr[mid]==target) return mid;
@@ -21,57 +20,73 @@ int binarySearchIterative(const vector<long long>& arr,long long target) {
     return -1;
 }
 
-// Rekursif 
+// Rekursif
 int binarySearchRecursive(const vector<long long>& arr,int left,int right,long long target) {
     if (right>=left) {
-        int mid = left + (right - left) / 2;
+        int mid=left+(right-left)/2;
         if (arr[mid]==target) return mid;
-        if (arr[mid]>target) return binarySearchRecursive(arr,left,mid-1,target);
-        return binarySearchRecursive(arr,mid + 1,right,target);
+        if (arr[mid] > target) return binarySearchRecursive(arr,left,mid-1,target);
+        return binarySearchRecursive(arr,mid+1,right,target);
     }
     return -1;
 }
 
-// --- Fungsi Bantu untuk Analisis ---
-
 int main() {
-    // Ukuran masukan yang akan diuji sesuai ketentuan (10 s.d 10000+) 
+    // Ukuran masukan yang diuji
     vector<int> inputSizes = {10, 100, 500, 1000, 5000, 10000, 50000, 100000};
     
-    cout<<"=================================================================\n";
-    cout<<"   Analisis Efisiensi Waktu: Binary Search (Iteratif vs Rekursif)\n";
-    cout<<"=================================================================\n";
-    cout<<left<<setw(15)<<"Ukuran Data"<<setw(25)<<"Waktu Iteratif (ns)"<<setw(25)<<"Waktu Rekursif (ns)\n";
-    cout<<"-----------------------------------------------------------------\n";
+    cout<<"==========================================================================================\n";
+    cout<<"               Analisis Efisiensi: Best Case vs Worst Case (Binary Search)\n";
+    cout<<"==========================================================================================\n";
+    cout<<left<<setw(12)<<"Ukuran"<<setw(22)<<"Iteratif BEST (ns)"<<setw(22)<<"Iteratif WORST (ns)"<<setw(22)<<"Rekursif BEST (ns)"<<setw(22)<<"Rekursif WORST (ns)\n";
+    cout<<"------------------------------------------------------------------------------------------\n";
 
     for (int n : inputSizes) {
-        // 1. Generate Data Dummy (Kode Barang terurut)
+        // Generate Data (Kode Barang Terurut)
         vector<long long> data(n);
-        for (int i=0;i<n;i++) {
-            data[i]=100000+i*2; // Contoh kode barang urut
+        for (int i = 0; i < n; i++) {
+            data[i] = 100000 + i * 2; 
         }
 
-        // Target yang dicari (ditaruh di akhir agar kasus terburuk/worst case)
-        long long target=data[n-1]; 
+        // --- DEFINISI KASUS ---
+        // Best Case: Target ada tepat di tengah (Langsung ketemu)
+        long long targetBest = data[(n - 1) / 2];
+        
+        // Worst Case: Target ada di ujung paling kanan (Harus membelah sampai habis)
+        long long targetWorst = data[n - 1]; 
 
-        // 2. Pengukuran Waktu Iteratif
-        auto startIter=high_resolution_clock::now();
-        binarySearchIterative(data,target);
-        auto stopIter=high_resolution_clock::now();
-        auto durationIter = duration_cast<nanoseconds>(stopIter - startIter);
+        // --- PENGUKURAN WAKTU ---
 
-        // 3. Pengukuran Waktu Rekursif
-        auto startRec=high_resolution_clock::now();
-        binarySearchRecursive(data, 0, n - 1, target);
-        auto stopRec=high_resolution_clock::now();
-        auto durationRec=duration_cast<nanoseconds>(stopRec-startRec);
+        // 1. Iteratif BEST
+        auto startIB = high_resolution_clock::now();
+        binarySearchIterative(data, targetBest);
+        auto stopIB = high_resolution_clock::now();
+        auto timeIB = duration_cast<nanoseconds>(stopIB - startIB);
 
-        // 4. Output Hasil untuk Tabel Laporan 
-        cout<<left<<setw(15)<<n<<setw(25)<<durationIter.count()<<setw(25)<<durationRec.count()<<"\n";
+        // 2. Iteratif WORST
+        auto startIW = high_resolution_clock::now();
+        binarySearchIterative(data, targetWorst);
+        auto stopIW = high_resolution_clock::now();
+        auto timeIW = duration_cast<nanoseconds>(stopIW - startIW);
+
+        // 3. Rekursif BEST
+        auto startRB = high_resolution_clock::now();
+        binarySearchRecursive(data, 0, n - 1, targetBest);
+        auto stopRB = high_resolution_clock::now();
+        auto timeRB = duration_cast<nanoseconds>(stopRB - startRB);
+
+        // 4. Rekursif WORST
+        auto startRW = high_resolution_clock::now();
+        binarySearchRecursive(data, 0, n - 1, targetWorst);
+        auto stopRW = high_resolution_clock::now();
+        auto timeRW = duration_cast<nanoseconds>(stopRW - startRW);
+
+        // --- OUTPUT HASIL ---
+        cout<<left<<setw(12)<<n<<setw(22)<<timeIB.count()<<setw(22)<<timeIW.count()<<setw(22)<<timeRB.count()<<setw(22)<<timeRW.count()<<"\n";
     }
-
-    cout<<"-----------------------------------------------------------------\n";
-    cout<<"Catatan: Waktu dalam nanoseconds (ns).\n";
-
+    cout<<"------------------------------------------------------------------------------------------\n";
+    cout<<"Keterangan:\n";
+    cout<<"Best Case  : Target berada tepat di tengah array (O(1)).\n";
+    cout<<"Worst Case : Target berada di ujung array, butuh pembagian maksimal (O(log n)).\n";
     return 0;
 }
